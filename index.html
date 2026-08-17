@@ -154,6 +154,7 @@ img{display:block;}
 .field textarea{min-height:118px;resize:vertical;line-height:1.55;}
 .field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--aqua);box-shadow:0 0 0 3px rgba(57,203,213,.25);}
 .field input.invalid,.field textarea.invalid{border-color:var(--danger);box-shadow:0 0 0 3px rgba(192,57,43,.12);}
+.cond-wrap{margin-top:11px;}
 .field-error{color:var(--danger);font-size:.85rem;margin-top:6px;font-family:var(--font-body);}
 .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;}
 .form-foot{margin-top:8px;display:flex;flex-wrap:wrap;gap:14px 18px;align-items:center;}
@@ -300,6 +301,9 @@ img{display:block;}
         <option value="Online portal or referral form">Online portal or referral form</option>
         <option value="Other">Other</option>
       </select>
+      <div class="cond-wrap" id="referralOtherWrap" hidden>
+        <input type="text" id="f-referral-other" name="referralOther" aria-label="Tell us how your team currently sends behavioral health referrals" placeholder="Tell us how — e.g. a specific tool or process">
+      </div>
     </div>
 
     <!-- spam honeypot: humans never see or fill this -->
@@ -333,7 +337,7 @@ img{display:block;}
   <div class="section-head">
     <span class="tag">What you'll take away</span>
     <h2>An hour of practical, insider know-how</h2>
-    <p>Brightside's Conor O'Neill, PhD walks through how a direct EHR connection reshapes the behavioral health referral process — and what it means for your patients and your team.</p>
+    <p>Brightside's Conor O'Neill, PhD and Hank Dickey walk through how a direct EHR connection reshapes the behavioral health referral process — and what it means for your patients and your team.</p>
   </div>
   <div class="learn">
     <div class="item">
@@ -460,6 +464,16 @@ img{display:block;}
   var submit = document.getElementById('regSubmit');
   if(!form) return;
 
+  /* referral-method "Other" -> reveal a free-text field */
+  var referralSel = document.getElementById('f-referral');
+  var referralOtherWrap = document.getElementById('referralOtherWrap');
+  var referralOther = document.getElementById('f-referral-other');
+  referralSel.addEventListener('change', function(){
+    var isOther = referralSel.value === 'Other';
+    referralOtherWrap.hidden = !isOther;
+    if(isOther){ referralOther.focus(); } else { referralOther.value = ''; }
+  });
+
   function setInvalid(input, on){
     input.classList.toggle('invalid', on);
     var e = input.parentElement.querySelector('.field-error'); if(e) e.hidden = !on;
@@ -492,7 +506,9 @@ img{display:block;}
       org: form.org.value.trim(),
       role: form.role.value.trim(),
       orgType: form.orgType.value,
-      referralMethod: form.referralMethod.value,
+      referralMethod: form.referralMethod.value === 'Other'
+        ? (referralOther.value.trim() ? 'Other: ' + referralOther.value.trim() : 'Other')
+        : form.referralMethod.value,
       futureOnly: !!futureOnly,
       page: location.href
     };
